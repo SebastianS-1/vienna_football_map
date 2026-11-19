@@ -51,3 +51,14 @@ def run_data_quality_checks(matches):
     print("\n--- Outliers in coordinates ---")
     print(outliers)
     return missing_values, duplicate_count, outliers
+
+def prepare_matches_for_map(matches):
+    valid_coordinates = matches[(matches["latitude"] >= -90.0) &
+                                (matches["latitude"] <= 90.0) &
+                                (matches["longitude"] >= -180.0) &
+                                (matches["longitude"] <= 180.0)]
+    map_matches = valid_coordinates[
+        ["date", "kickoff", "home_team", "away_team",
+         "stadium", "latitude", "longitude"]
+    ].copy()
+    return map_matches

@@ -2,7 +2,8 @@ import pandas as pd
 
 from src.data_processing import (get_team_matches, get_upcoming_matches,
                                   check_coordinates, get_duplicate_matches,
-                                  check_missing_values, run_data_quality_checks)
+                                  check_missing_values, run_data_quality_checks,
+                                  prepare_matches_for_map)
 
 
 def test_get_team_matches():
@@ -113,3 +114,34 @@ def test_quality_checks():
     assert missing_values["kickoff"] == 1
     assert duplicate_count == 2
     assert len(outliers) == 2
+
+def test_prepare_matches_for_map_empty():
+    test_data = pd.DataFrame({
+        "date": ["2026-11-21", "2026-11-22", "2026-11-23", "2026-11-24"],
+        "kickoff": ["17:00", "14:30", "19:00", "20:00"],
+        "home_team": ["Rapid Wien", "Austria Wien", "Sturm Graz", "LASK"],
+        "away_team": ["Sturm Graz", "LASK", "Rapid Wien", "Austria Wien"],
+        "stadium": ["Allianz Stadion", "Generali Arena", "Merkur Arena", "Raiffeisen Arena"],
+        "latitude": [99.16, 91.0, 48.16, 48.20],
+        "longitude": [16.38, 16.38, 181.0, -190.30]
+    })
+
+    map_matches = prepare_matches_for_map(test_data)
+
+    assert map_matches.empty
+
+def test_prepare_matches_for_map():
+    test_data = pd.DataFrame({
+        "date": ["2026-11-21", "2026-11-22", "2026-11-23", "2026-11-24"],
+        "kickoff": ["17:00", "14:30", "19:00", "20:00"],
+        "home_team": ["Rapid Wien", "Austria Wien", "Sturm Graz", "LASK"],
+        "away_team": ["Sturm Graz", "LASK", "Rapid Wien", "Austria Wien"],
+        "stadium": ["Allianz Stadion", "Generali Arena", "Merkur Arena", "Raiffeisen Arena"],
+        "latitude": [16.16, 91.0, 48.16, 48.20],
+        "longitude": [16.38, 16.38, 181.0, 90.30]
+    })
+
+    map_matches = prepare_matches_for_map(test_data)
+
+    assert len(map_matches) == 2
+    assert map_matches["home_team"].tolist() == ["Rapid Wien", "LASK"]
